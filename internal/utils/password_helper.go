@@ -18,7 +18,7 @@ const (
 	KeyLength   = 32        // Desired length of the hash
 )
 
-func GenerateRandomString() ([]byte, error) {
+func GenerateRandomSalt() ([]byte, error) {
 	bytes := make([]byte, 12)
 	if _, err := rand.Read(bytes); err != nil {
 		return nil, err
@@ -31,7 +31,7 @@ func GenerateHash(value []byte, salt []byte) []byte {
 }
 
 func HashPassword(password string) (string, error) {
-	salt, err := GenerateRandomString()
+	salt, err := GenerateRandomSalt()
 	if err != nil {
 		return "", err
 	}
