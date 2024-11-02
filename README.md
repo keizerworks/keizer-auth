@@ -61,3 +61,7 @@ Clean up binary from the last build:
 ```bash
 make clean
 ```
+
+## Contributing
+
+Take a look at the [contributing guidelines](CONTRIBUTING.md) for this project.
