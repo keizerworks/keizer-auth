@@ -1,7 +1,6 @@
 package server
 
 import (
-	"keizer-auth-api/internal/handlers"
 	"keizer-auth-api/internal/middlewares"
 
 	"github.com/gofiber/fiber/v2"
@@ -16,8 +15,6 @@ func (s *FiberServer) RegisterFiberRoutes() {
 	auth := api.Group("/auth")
 	auth.Post("/register", s.controllers.Auth.Register)
 	auth.Post("/login", s.controllers.Auth.Login)
-
-	handlers.RegisterAuthHandlers(api)
 }
 
 func (s *FiberServer) healthHandler(c *fiber.Ctx) error {
