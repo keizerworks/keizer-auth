@@ -14,6 +14,11 @@ var allowedDomains = []string{
 
 // Middleware to validate request origin
 func OriginValidationMiddleware(c *fiber.Ctx) error {
+	// Allow if running on localhost
+	if c.Hostname() == "localhost" || c.Hostname() == "127.0.0.1" {
+		return c.Next()
+	}
+
 	origin := c.Get("Origin")
 
 	for _, domain := range allowedDomains {

@@ -40,6 +40,11 @@ func gracefulShutdown(fiberServer *server.FiberServer, done chan bool) {
 		log.Printf("Server forced to shutdown with error: %v", err)
 	}
 
+	// Cleanup database and other resources
+	if err := fiberServer.Shutdown(); err != nil {
+		log.Printf("Resource cleanup error: %v", err)
+	}
+
 	log.Println("Server exiting")
 
 	// Notify the main goroutine that the shutdown is complete

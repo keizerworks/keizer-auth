@@ -33,7 +33,6 @@ func ValidateSession(
 	}
 
 	if time.Now().After(session.ExpiresAt.Add(-sessionExpiresIn / 2)) {
-		// Extend the session expiration
 		session.ExpiresAt = time.Now().Add(sessionExpiresIn)
 		if err := repo.UpdateSession(session); err != nil {
 			return nil, err
