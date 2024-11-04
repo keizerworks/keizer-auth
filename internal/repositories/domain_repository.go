@@ -18,12 +18,12 @@ func (r *DomainRepository) GetActiveDomain(
 	origin string,
 ) (*models.Domain, error) {
 	var session models.Domain
-	err := r.db.First(
+
+	if err := r.db.First(
 		&session,
 		"origin = ?",
 		origin,
-	).Error
-	if err != nil {
+	).Error; err != nil {
 		return nil, err
 	}
 
