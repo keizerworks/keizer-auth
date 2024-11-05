@@ -16,9 +16,16 @@ func NewAuthService(userRepo *repositories.UserRepository) *AuthService {
 }
 
 func (as *AuthService) RegisterUser(userRegister *validators.UserRegister) error {
-	// TODO: create and send OTP to user email for user verification
-
 	passwordHash, err := utils.HashPassword(userRegister.Password)
+	if err != nil {
+		return err
+	}
+	otp, err := utils.GenerateOTP()
+	if err != nil {
+		return err
+	}
+
+	err = SendOTPEmail(userRegister.Email, otp)
 	if err != nil {
 		return err
 	}
@@ -28,5 +35,6 @@ func (as *AuthService) RegisterUser(userRegister *validators.UserRegister) error
 		FirstName:    userRegister.FirstName,
 		LastName:     userRegister.LastName,
 		PasswordHash: passwordHash,
+		Otp:          otp,
 	})
 }
