@@ -15,6 +15,9 @@ func (s *FiberServer) RegisterFiberRoutes() {
 	auth := api.Group("/auth")
 	auth.Post("/register", s.controllers.Auth.Register)
 	auth.Post("/login", s.controllers.Auth.Login)
+
+	s.Static("/", "./web/dist")
+	s.Static("*", "./web/dist/index.html")
 }
 
 func (s *FiberServer) healthHandler(c *fiber.Ctx) error {
