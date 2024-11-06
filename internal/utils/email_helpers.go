@@ -20,7 +20,3 @@ func GenerateOTP() (string, error) {
 	}
 	return otp, nil
 }
-
-func ConstructOTPMail(subject string, body string) string {
-	return "Subject: " + subject + "\r\n\r\n" + body
-}
