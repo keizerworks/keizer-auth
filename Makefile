@@ -3,9 +3,15 @@
 # Build the application
 all: build test
 
-build:
+lint:
+	@golangci-lint run
+
+
+build-frontend:
 	@echo "Building frontend..."
 	@cd web && pnpm install && pnpm build && cd ..
+
+build:
 	@echo "Building..."
 	@go build -o main cmd/api/main.go
 

@@ -8,7 +8,7 @@ import (
 
 type Session struct {
 	ExpiresAt time.Time
-	Token     string `gorm:"not null;unique"`
-	SessionId string `gorm:"primaryKey;not null"`
+	Token     string `gorm:"not null;unique;default:null"`
+	SessionId string `gorm:"primaryKey;not null;default:null"`
 	UserID    uuid.UUID
 }

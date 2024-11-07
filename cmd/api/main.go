@@ -3,13 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
-	"keizer-auth-api/internal/server"
 	"log"
 	"os"
 	"os/signal"
 	"strconv"
 	"syscall"
 	"time"
+
+	"keizer-auth-api/internal/server"
 
 	_ "github.com/joho/godotenv/autoload"
 )

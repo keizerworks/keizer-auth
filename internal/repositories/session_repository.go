@@ -1,8 +1,9 @@
 package repositories
 
 import (
-	"keizer-auth-api/internal/models"
 	"time"
+
+	"keizer-auth-api/internal/models"
 
 	"gorm.io/gorm"
 )

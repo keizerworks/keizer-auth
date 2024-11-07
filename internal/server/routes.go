@@ -1,20 +1,23 @@
 package server
 
 import (
-	"keizer-auth-api/internal/middlewares"
-
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 func (s *FiberServer) RegisterFiberRoutes() {
+	s.Use(cors.New(cors.Config{
+		AllowOrigins: "*",
+	}))
+
 	s.Get("/health", s.healthHandler)
 
-	api := s.Group("/api", middlewares.OriginValidationMiddleware)
+	api := s.Group("/api")
 
 	// auth handlers
 	auth := api.Group("/auth")
-	auth.Post("/register", s.controllers.Auth.Register)
-	auth.Post("/login", s.controllers.Auth.Login)
+	auth.Post("/sign-up", s.controllers.Auth.SignUp)
+	auth.Post("/sign-in", s.controllers.Auth.SignIn)
 
 	s.Static("/", "./web/dist")
 	s.Static("*", "./web/dist/index.html")

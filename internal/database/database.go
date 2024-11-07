@@ -3,11 +3,12 @@ package database
 import (
 	"context"
 	"fmt"
-	"keizer-auth-api/internal/models"
 	"log"
 	"os"
 	"strconv"
 	"time"
+
+	"keizer-auth-api/internal/models"
 
 	_ "github.com/joho/godotenv/autoload"
 	"gorm.io/driver/postgres"
@@ -47,7 +48,8 @@ func New() Service {
 	}
 
 	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Shanghai",
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable "+
+			"TimeZone=Asia/Shanghai",
 		host,
 		username,
 		password,
@@ -64,7 +66,10 @@ func New() Service {
 		log.Fatal(err)
 	}
 
-	autoMigrate(gormDB)
+	err = autoMigrate(gormDB)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	dbInstance = &service{
 		db: gormDB,
@@ -78,7 +83,11 @@ func GetDB() *gorm.DB {
 }
 
 func autoMigrate(db *gorm.DB) error {
-	return db.AutoMigrate(&models.User{})
+	return db.AutoMigrate(
+		&models.User{},
+		&models.Domain{},
+		&models.Session{},
+	)
 }
 
 // Health checks the health of the database connection by pinging the database.
@@ -126,15 +135,19 @@ func (s *service) Health() map[string]string {
 	}
 
 	if dbStats.WaitCount > 1000 {
-		stats["message"] = "The database has a high number of wait events, indicating potential bottlenecks."
+		stats["message"] = "The database has a high number of wait events, " +
+			"indicating potential bottlenecks."
 	}
 
 	if dbStats.MaxIdleClosed > int64(dbStats.OpenConnections)/2 {
-		stats["message"] = "Many idle connections are being closed, consider revising the connection pool settings."
+		stats["message"] = "Many idle connections are being closed, " +
+			"consider revising the connection pool settings."
 	}
 
 	if dbStats.MaxLifetimeClosed > int64(dbStats.OpenConnections)/2 {
-		stats["message"] = "Many connections are being closed due to max lifetime, consider increasing max lifetime or revising the connection usage pattern."
+		stats["message"] = "Many connections are being closed due to max " +
+			"lifetime, consider increasing max lifetime or revising the " +
+			"connection usage pattern."
 	}
 
 	return stats

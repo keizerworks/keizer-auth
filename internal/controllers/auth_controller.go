@@ -1,10 +1,13 @@
 package controllers
 
 import (
+	"errors"
+
 	"keizer-auth-api/internal/services"
 	"keizer-auth-api/internal/validators"
 
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
 type AuthController struct {
@@ -15,12 +18,12 @@ func NewAuthController(as *services.AuthService) *AuthController {
 	return &AuthController{authService: as}
 }
 
-func (ac *AuthController) Login(c *fiber.Ctx) error {
+func (ac *AuthController) SignIn(c *fiber.Ctx) error {
 	return c.SendString("Login successful!")
 }
 
-func (ac *AuthController) Register(c *fiber.Ctx) error {
-	user := new(validators.UserRegister)
+func (ac *AuthController) SignUp(c *fiber.Ctx) error {
+	user := new(validators.SignUpUser)
 
 	if err := c.BodyParser(user); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
@@ -31,8 +34,18 @@ func (ac *AuthController) Register(c *fiber.Ctx) error {
 	}
 
 	if err := ac.authService.RegisterUser(user); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Something went wrong"})
+		if errors.Is(err, gorm.ErrCheckConstraintViolated) {
+			return c.
+				Status(fiber.StatusBadRequest).
+				JSON(fiber.Map{
+					"error": "Input validation error, please check your details",
+				})
+		}
+
+		return c.
+			Status(fiber.StatusInternalServerError).
+			JSON(fiber.Map{"error": "Failed to sign up user"})
 	}
 
-	return c.SendString("User registered!")
+	return c.JSON(fiber.Map{"message": "User Signed Up!"})
 }
