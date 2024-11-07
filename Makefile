@@ -68,4 +68,11 @@ watch:
 		fi; \
 	fi
 
+install-deps:
+	@echo "running pnpm install.."
+	@cd web && pnpm install && cd ..
+
+watch-web:
+	@cd web && pnpm dev
+
 .PHONY: all build run test clean watch docker-run docker-down itest

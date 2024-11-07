@@ -30,6 +30,15 @@ services:
       - "8025:8025" # Web UI for email testing
     restart: unless-stopped
 
+  redis:
+    image: redis:latest
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
 volumes:
   psql_volume_bp:
   minio_data:
+  redis_data:
