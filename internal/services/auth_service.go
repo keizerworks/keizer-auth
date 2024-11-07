@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+
 	"keizer-auth-api/internal/models"
 	"keizer-auth-api/internal/repositories"
 	"keizer-auth-api/internal/utils"
