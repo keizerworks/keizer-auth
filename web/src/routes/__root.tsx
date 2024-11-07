@@ -8,7 +8,6 @@ export const Route = createRootRoute({
 function RootComponent() {
   return (
     <>
-      <hr />
       <Outlet />
       <TanStackRouterDevtools position="bottom-right" />
     </>

@@ -4,19 +4,22 @@ import (
 	"crypto/rand"
 	"encoding/base32"
 	"errors"
+	"time"
+
 	"keizer-auth-api/internal/models"
 	"keizer-auth-api/internal/repositories"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 const sessionExpiresIn = 30 * 24 * time.Hour
 
-func GenerateSessionID() string {
+func GenerateSessionID() (string, error) {
 	bytes := make([]byte, 15)
-	rand.Read(bytes)
-	return base32.StdEncoding.EncodeToString(bytes)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return base32.StdEncoding.EncodeToString(bytes), nil
 }
 
 func ValidateSession(

@@ -23,10 +23,20 @@ type EmailService struct {
 }
 
 func NewEmailService() *EmailService {
-	return &EmailService{host: smtpHost, port: smtpPort, user: smtpUser, pass: smtpPassword, from: from}
+	return &EmailService{
+		host: smtpHost,
+		port: smtpPort,
+		user: smtpUser,
+		pass: smtpPassword,
+		from: from,
+	}
 }
 
-func (es *EmailService) SendEmail(to string, subject string, body string) error {
+func (es *EmailService) SendEmail(
+	to string,
+	subject string,
+	body string,
+) error {
 	message := []byte("To: " + to + "\r\n" +
 		"Subject: " + subject + "\r\n" +
 		"\r\n" +
@@ -36,9 +46,12 @@ func (es *EmailService) SendEmail(to string, subject string, body string) error 
 	if es.pass != "" {
 		auth = smtp.PlainAuth("", es.user, es.pass, es.host)
 	}
-	err := smtp.SendMail(es.host+":"+es.port, auth, es.from, []string{to}, message)
 
-	if err != nil {
+	if err := smtp.SendMail(
+		es.host+":"+es.port, auth, es.from,
+		[]string{to},
+		message,
+	); err != nil {
 		return fmt.Errorf("failed to send email: %w", err)
 	}
 	return nil

@@ -27,7 +27,7 @@ const router = createRouter({
     return (
       <QueryClientProvider client={queryClient}>
         {children}
-        <Toaster richColors />
+        <Toaster />
       </QueryClientProvider>
     );
   },
