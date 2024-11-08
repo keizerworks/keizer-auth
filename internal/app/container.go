@@ -10,7 +10,6 @@ import (
 
 type Container struct {
 	DB             database.Service
-	RedisService   database.RedisService
 	AuthService    *services.AuthService
 	SessionService *services.SessionService
 }
@@ -31,9 +30,8 @@ func GetContainer() *Container {
 		authService := services.NewAuthService(userRepo, redisRepo)
 
 		container = &Container{
-			DB:           db,
-			AuthService:  authService,
-			RedisService: *rds,
+			DB:          db,
+			AuthService: authService,
 		}
 	})
 	return container

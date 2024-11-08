@@ -37,7 +37,7 @@ func (ss *SessionService) CreateSession(uuid uuid.UUID) (string, error) {
 		return "", fmt.Errorf("error occured %w", err)
 	}
 
-	err = ss.redisRepo.SetEx("dashboard-user-session-"+sessionId, string(userJson), utils.SessionExpiresIn)
+	err = ss.redisRepo.Set("dashboard-user-session-"+sessionId, string(userJson), utils.SessionExpiresIn)
 	if err != nil {
 		return "", fmt.Errorf("error in setting session %w", err)
 	}
@@ -66,7 +66,7 @@ func (ss *SessionService) UpdateSession(sessionId string) error {
 		}
 		return err
 	}
-	err = ss.redisRepo.SetEx("dashboard-user-session-"+sessionId, val, utils.SessionExpiresIn)
+	err = ss.redisRepo.Set("dashboard-user-session-"+sessionId, val, utils.SessionExpiresIn)
 	if err != nil {
 		return fmt.Errorf("error in updating session %w", err)
 	}

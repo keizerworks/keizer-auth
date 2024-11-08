@@ -18,13 +18,8 @@ func (rr *RedisRepository) Get(key string) (string, error) {
 	return value, err
 }
 
-func (rr *RedisRepository) Set(key string, value string) error {
-	err := rr.rds.RedisClient.Set(rr.rds.Ctx, key, value, 0).Err()
-	return err
-}
-
 // set a key's value with expiration
-func (rr *RedisRepository) SetEx(key string, value string, expiration time.Duration) error {
+func (rr *RedisRepository) Set(key string, value string, expiration time.Duration) error {
 	err := rr.rds.RedisClient.Set(rr.rds.Ctx, key, value, expiration).Err()
 	return err
 }

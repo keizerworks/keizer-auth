@@ -32,7 +32,7 @@ func (as *AuthService) RegisterUser(userRegister *validators.SignUpUser) error {
 		return fmt.Errorf("failed to generate OTP: %w", err)
 	}
 
-	err = as.redisRepo.SetEx("registration-verification-otp-"+userRegister.Email, otp, time.Minute)
+	err = as.redisRepo.Set("registration-verification-otp-"+userRegister.Email, otp, time.Minute)
 	if err != nil {
 		return fmt.Errorf("failed to save otp in redis: %w", err)
 	}
