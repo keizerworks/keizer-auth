@@ -10,8 +10,8 @@ import (
 var rdb *RedisService
 
 type RedisService struct {
-	redisClient *redis.Client
-	ctx         context.Context
+	RedisClient *redis.Client
+	Ctx         context.Context
 }
 
 func NewRedisClient() *RedisService {
@@ -24,7 +24,7 @@ func NewRedisClient() *RedisService {
 	})
 	ctx := context.Background()
 
-	rdb = &RedisService{redisClient: redisClient, ctx: ctx}
+	rdb = &RedisService{RedisClient: redisClient, Ctx: ctx}
 
 	return rdb
 }
