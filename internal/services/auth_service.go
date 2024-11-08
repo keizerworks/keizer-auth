@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 
+	"keizer-auth-api/internal/database"
 	"keizer-auth-api/internal/models"
 	"keizer-auth-api/internal/repositories"
 	"keizer-auth-api/internal/utils"
@@ -11,9 +12,10 @@ import (
 
 type AuthService struct {
 	userRepo *repositories.UserRepository
+	rds      *database.RedisService
 }
 
-func NewAuthService(userRepo *repositories.UserRepository) *AuthService {
+func NewAuthService(userRepo *repositories.UserRepository, rds *database.RedisService) *AuthService {
 	return &AuthService{userRepo: userRepo}
 }
 

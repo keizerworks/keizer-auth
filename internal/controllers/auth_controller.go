@@ -49,3 +49,11 @@ func (ac *AuthController) SignUp(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{"message": "User Signed Up!"})
 }
+
+func (ac *AuthController) VerifyOTP(c *fiber.Ctx) error {
+	userEmail := new(validators.VerifyOTP)
+
+	if err := c.BodyParser(userEmail); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
+	}
+}

@@ -18,6 +18,7 @@ func (s *FiberServer) RegisterFiberRoutes() {
 	auth := api.Group("/auth")
 	auth.Post("/sign-up", s.controllers.Auth.SignUp)
 	auth.Post("/sign-in", s.controllers.Auth.SignIn)
+	auth.Post("/verify-otp", s.controllers.Auth.VerifyOTP)
 
 	s.Static("/", "./web/dist")
 	s.Static("*", "./web/dist/index.html")
