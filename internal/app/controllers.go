@@ -8,6 +8,6 @@ type ServerControllers struct {
 
 func GetControllers(container *Container) *ServerControllers {
 	return &ServerControllers{
-		Auth: controllers.NewAuthController(container.AuthService),
+		Auth: controllers.NewAuthController(container.AuthService, container.SessionService),
 	}
 }
