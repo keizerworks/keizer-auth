@@ -18,18 +18,6 @@ func GenerateSessionID() (string, error) {
 	return base32.StdEncoding.EncodeToString(bytes), nil
 }
 
-// func ValidateSession(
-// 	sessionID string,
-// 	ttl time.Duration,
-// ) error {
-// 	if ttl < SessionExpiresIn {
-// 		if err := sessionService.UpdateSession(sessionID); err != nil {
-// 			return nil, err
-// 		}
-// 	}
-// 	return nil
-// }
-
 func SetSessionCookie(c *fiber.Ctx, sessionID string) {
 	c.Cookie(&fiber.Cookie{
 		Name:     "session_id",
