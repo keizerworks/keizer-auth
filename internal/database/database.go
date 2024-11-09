@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"keizer-auth-api/internal/models"
+	"keizer-auth/internal/models"
 
 	_ "github.com/joho/godotenv/autoload"
 	"gorm.io/driver/postgres"

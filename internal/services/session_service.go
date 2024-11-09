@@ -3,9 +3,9 @@ package services
 import (
 	"encoding/json"
 	"fmt"
-	"keizer-auth-api/internal/models"
-	"keizer-auth-api/internal/repositories"
-	"keizer-auth-api/internal/utils"
+	"keizer-auth/internal/models"
+	"keizer-auth/internal/repositories"
+	"keizer-auth/internal/utils"
 	"time"
 
 	"github.com/google/uuid"

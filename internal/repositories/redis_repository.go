@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"keizer-auth-api/internal/database"
+	"keizer-auth/internal/database"
 	"time"
 )
 

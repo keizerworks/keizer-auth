@@ -3,7 +3,7 @@ package validators
 import (
 	"unicode"
 
-	"keizer-auth-api/internal/utils"
+	"keizer-auth/internal/utils"
 
 	"github.com/gookit/validate"
 )
