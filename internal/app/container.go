@@ -3,9 +3,9 @@ package app
 import (
 	"sync"
 
-	"keizer-auth-api/internal/database"
-	"keizer-auth-api/internal/repositories"
-	"keizer-auth-api/internal/services"
+	"keizer-auth/internal/database"
+	"keizer-auth/internal/repositories"
+	"keizer-auth/internal/services"
 )
 
 type Container struct {

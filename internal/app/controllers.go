@@ -1,6 +1,6 @@
 package app
 
-import "keizer-auth-api/internal/controllers"
+import "keizer-auth/internal/controllers"
 
 type ServerControllers struct {
 	Auth *controllers.AuthController

@@ -1,7 +1,7 @@
 package server
 
 import (
-	"keizer-auth-api/internal/app"
+	"keizer-auth/internal/app"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -18,8 +18,8 @@ func New() *FiberServer {
 
 	server := &FiberServer{
 		App: fiber.New(fiber.Config{
-			ServerHeader: "keizer-auth-api",
-			AppName:      "keizer-auth-api",
+			ServerHeader: "keizer-auth",
+			AppName:      "keizer-auth",
 		}),
 		container:   container,
 		controllers: controllers,

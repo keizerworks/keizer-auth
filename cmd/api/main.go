@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	"keizer-auth-api/internal/server"
+	"keizer-auth/internal/server"
 
 	_ "github.com/joho/godotenv/autoload"
 )

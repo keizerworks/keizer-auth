@@ -6,10 +6,10 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	"keizer-auth-api/internal/models"
-	"keizer-auth-api/internal/repositories"
-	"keizer-auth-api/internal/utils"
-	"keizer-auth-api/internal/validators"
+	"keizer-auth/internal/models"
+	"keizer-auth/internal/repositories"
+	"keizer-auth/internal/utils"
+	"keizer-auth/internal/validators"
 )
 
 type AuthService struct {

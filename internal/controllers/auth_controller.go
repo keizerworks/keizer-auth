@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"keizer-auth-api/internal/services"
-	"keizer-auth-api/internal/utils"
-	"keizer-auth-api/internal/validators"
+	"keizer-auth/internal/services"
+	"keizer-auth/internal/utils"
+	"keizer-auth/internal/validators"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"

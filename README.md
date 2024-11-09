@@ -1,4 +1,4 @@
-# Project keizer-auth-api
+# Project keizer-auth
 
 One Paragraph of project description goes here
 

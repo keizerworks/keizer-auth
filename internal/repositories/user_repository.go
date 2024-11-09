@@ -2,7 +2,7 @@ package repositories
 
 import (
 	"fmt"
-	"keizer-auth-api/internal/models"
+	"keizer-auth/internal/models"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
