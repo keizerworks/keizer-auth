@@ -9,8 +9,9 @@ import (
 )
 
 type Container struct {
-	DB          database.Service
-	AuthService *services.AuthService
+	DB             database.Service
+	AuthService    *services.AuthService
+	SessionService *services.SessionService
 }
 
 var (
@@ -22,9 +23,11 @@ func GetContainer() *Container {
 	once.Do(func() {
 		db := database.New()
 		gormDB := database.GetDB()
+		rds := database.NewRedisClient()
 
 		userRepo := repositories.NewUserRepository(gormDB)
-		authService := services.NewAuthService(userRepo)
+		redisRepo := repositories.NewRedisRepository(rds)
+		authService := services.NewAuthService(userRepo, redisRepo)
 
 		container = &Container{
 			DB:          db,

@@ -2,6 +2,9 @@ package services
 
 import (
 	"fmt"
+	"time"
+
+	"github.com/redis/go-redis/v9"
 
 	"keizer-auth-api/internal/models"
 	"keizer-auth-api/internal/repositories"
@@ -10,11 +13,12 @@ import (
 )
 
 type AuthService struct {
-	userRepo *repositories.UserRepository
+	userRepo  *repositories.UserRepository
+	redisRepo *repositories.RedisRepository
 }
 
-func NewAuthService(userRepo *repositories.UserRepository) *AuthService {
-	return &AuthService{userRepo: userRepo}
+func NewAuthService(userRepo *repositories.UserRepository, redisRepo *repositories.RedisRepository) *AuthService {
+	return &AuthService{userRepo: userRepo, redisRepo: redisRepo}
 }
 
 func (as *AuthService) RegisterUser(userRegister *validators.SignUpUser) error {
@@ -26,6 +30,11 @@ func (as *AuthService) RegisterUser(userRegister *validators.SignUpUser) error {
 	otp, err := utils.GenerateOTP()
 	if err != nil {
 		return fmt.Errorf("failed to generate OTP: %w", err)
+	}
+
+	err = as.redisRepo.Set("registration-verification-otp-"+userRegister.Email, otp, time.Minute)
+	if err != nil {
+		return fmt.Errorf("failed to save otp in redis: %w", err)
 	}
 
 	// TODO: email should be sent using async func
@@ -43,4 +52,19 @@ func (as *AuthService) RegisterUser(userRegister *validators.SignUpUser) error {
 	}
 
 	return nil
+}
+
+func (as *AuthService) VerifyOTP(verifyOtpBody *validators.VerifyOTP) (bool, error) {
+	val, err := as.redisRepo.Get(verifyOtpBody.Email)
+	if err != nil {
+		if err == redis.Nil {
+			return false, fmt.Errorf("otp expired")
+		}
+		return false, fmt.Errorf("failed to get otp from redis %w", err)
+	}
+
+	if val != verifyOtpBody.Otp {
+		return false, nil
+	}
+	return true, nil
 }
