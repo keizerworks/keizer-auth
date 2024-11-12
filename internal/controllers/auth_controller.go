@@ -2,14 +2,12 @@ package controllers
 
 import (
 	"errors"
-	"fmt"
 
 	"keizer-auth/internal/services"
 	"keizer-auth/internal/utils"
 	"keizer-auth/internal/validators"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -76,11 +74,7 @@ func (ac *AuthController) VerifyOTP(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "OTP not valid"})
 	}
 
-	parsedUuid, err := uuid.Parse(verifyOtpBody.Id)
-	if err != nil {
-		return fmt.Errorf("error parsing uuid %w", err)
-	}
-	sessionId, err := ac.sessionService.CreateSession(parsedUuid)
+	sessionId, err := ac.sessionService.CreateSession(verifyOtpBody.Id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create session"})
 	}

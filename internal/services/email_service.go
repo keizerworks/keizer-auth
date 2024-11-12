@@ -11,7 +11,7 @@ var (
 	smtpPort     = os.Getenv("SMTP_PORT")
 	smtpUser     = os.Getenv("SMTP_USER")
 	smtpPassword = os.Getenv("SMTP_PASSWORD")
-	from         = os.Getenv("EMAIL_FROM")
+	from         = os.Getenv("MAIL_FROM")
 )
 
 type EmailService struct {

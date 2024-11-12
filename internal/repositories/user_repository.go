@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"keizer-auth/internal/models"
 
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -20,9 +19,9 @@ func (r *UserRepository) CreateUser(user *models.User) error {
 	return r.db.Create(user).Error
 }
 
-func (r *UserRepository) GetUser(uuid uuid.UUID) (*models.User, error) {
-	var user models.User
-	result := r.db.First(&user, uuid.String())
+func (r *UserRepository) GetUser(uuid string) (*models.User, error) {
+	user := new(models.User)
+	result := r.db.First(&user, "id = ?", uuid)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("user not found")
@@ -30,5 +29,5 @@ func (r *UserRepository) GetUser(uuid uuid.UUID) (*models.User, error) {
 		return nil, fmt.Errorf("error in getting user: %w", result.Error)
 	}
 
-	return &user, nil
+	return user, nil
 }

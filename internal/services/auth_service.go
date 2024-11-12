@@ -55,7 +55,7 @@ func (as *AuthService) RegisterUser(userRegister *validators.SignUpUser) error {
 }
 
 func (as *AuthService) VerifyOTP(verifyOtpBody *validators.VerifyOTP) (bool, error) {
-	val, err := as.redisRepo.Get(verifyOtpBody.Email)
+	val, err := as.redisRepo.Get("registration-verification-otp-" + verifyOtpBody.Email)
 	if err != nil {
 		if err == redis.Nil {
 			return false, fmt.Errorf("otp expired")
