@@ -31,3 +31,7 @@ func (r *UserRepository) GetUser(uuid string) (*models.User, error) {
 
 	return user, nil
 }
+
+func (r *UserRepository) UpdateUser(id string, updates *models.User) error {
+	return r.db.Model(&models.User{}).Where("id = ?", id).Updates(updates).Error
+}

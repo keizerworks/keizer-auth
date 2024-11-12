@@ -68,3 +68,7 @@ func (as *AuthService) VerifyOTP(verifyOtpBody *validators.VerifyOTP) (bool, err
 	}
 	return true, nil
 }
+
+func (as *AuthService) SetIsVerified(id string) error {
+	return as.userRepo.UpdateUser(id, &models.User{IsVerified: true})
+}

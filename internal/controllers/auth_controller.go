@@ -74,6 +74,11 @@ func (ac *AuthController) VerifyOTP(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "OTP not valid"})
 	}
 
+	err = ac.authService.SetIsVerified(verifyOtpBody.Id)
+	if err != nil {
+		return err
+	}
+
 	sessionId, err := ac.sessionService.CreateSession(verifyOtpBody.Id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create session"})
