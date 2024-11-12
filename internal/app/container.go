@@ -12,6 +12,7 @@ type Container struct {
 	DB             database.Service
 	AuthService    *services.AuthService
 	SessionService *services.SessionService
+	EmailService   *services.EmailService
 }
 
 var (
@@ -28,10 +29,12 @@ func GetContainer() *Container {
 		userRepo := repositories.NewUserRepository(gormDB)
 		redisRepo := repositories.NewRedisRepository(rds)
 		authService := services.NewAuthService(userRepo, redisRepo)
+		sessionService := services.NewSessionService(redisRepo, userRepo)
 
 		container = &Container{
-			DB:          db,
-			AuthService: authService,
+			DB:             db,
+			AuthService:    authService,
+			SessionService: sessionService,
 		}
 	})
 	return container

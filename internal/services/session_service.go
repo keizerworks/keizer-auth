@@ -8,7 +8,6 @@ import (
 	"keizer-auth/internal/utils"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -17,11 +16,11 @@ type SessionService struct {
 	userRepo  *repositories.UserRepository
 }
 
-func NewSessionService(redisRepo *repositories.RedisRepository) *SessionService {
-	return &SessionService{redisRepo: redisRepo}
+func NewSessionService(redisRepo *repositories.RedisRepository, userRepo *repositories.UserRepository) *SessionService {
+	return &SessionService{redisRepo: redisRepo, userRepo: userRepo}
 }
 
-func (ss *SessionService) CreateSession(uuid uuid.UUID) (string, error) {
+func (ss *SessionService) CreateSession(uuid string) (string, error) {
 	sessionId, err := utils.GenerateSessionID()
 	if err != nil {
 		return "", fmt.Errorf("error in generating session %w", err)
