@@ -21,7 +21,27 @@ func NewAuthController(as *services.AuthService, ss *services.SessionService) *A
 }
 
 func (ac *AuthController) SignIn(c *fiber.Ctx) error {
-	return c.SendString("Login successful!")
+	body := new(validators.SignInUser)
+
+	if err := c.BodyParser(body); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
+	}
+
+	isValid, userDetails, err := ac.authService.VerifyPassword(body.Email, body.Password)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Internal Server Error"})
+	}
+	if !isValid {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid email or password"})
+	}
+
+	sessionId, err := ac.sessionService.CreateSession(userDetails.ID.String())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create session"})
+	}
+	utils.SetSessionCookie(c, sessionId)
+
+	return c.JSON(fiber.Map{"message": "signed in successfully"})
 }
 
 func (ac *AuthController) SignUp(c *fiber.Ctx) error {

@@ -54,6 +54,26 @@ func (as *AuthService) RegisterUser(userRegister *validators.SignUpUser) error {
 	return nil
 }
 
+func (as *AuthService) VerifyPassword(email string, password string) (bool, *models.User, error) {
+	user, err := as.userRepo.GetUserByStruct(&models.User{Email: email})
+	if err != nil {
+		return false, nil, err
+	}
+	if user == nil {
+		return false, nil, err
+	}
+
+	isValid, err := utils.VerifyPassword(password, user.PasswordHash)
+	if err != nil {
+		return false, nil, err
+	}
+	if !isValid {
+		return false, nil, nil
+	}
+
+	return true, user, nil
+}
+
 func (as *AuthService) VerifyOTP(verifyOtpBody *validators.VerifyOTP) (bool, error) {
 	val, err := as.redisRepo.Get("registration-verification-otp-" + verifyOtpBody.Email)
 	if err != nil {
