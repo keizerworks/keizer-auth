@@ -33,12 +33,14 @@ const FormField = <
   label,
   description,
   className,
+  descriptionClassName,
   render,
   ...props
 }: {
   label?: React.ReactNode;
   description?: React.ReactNode;
   className?: string;
+  descriptionClassName?: string;
 } & ControllerProps<TFieldValues, TName>) => {
   return (
     <FormFieldContext.Provider value={{ name: props.name }}>
@@ -49,7 +51,7 @@ const FormField = <
             {!!label && <FormLabel>{label}</FormLabel>}
             <FormControl>{render(field)}</FormControl>
             {!!description && <FormDescription>{description}</FormDescription>}
-            <FormMessage />
+            <FormMessage className={descriptionClassName} />
           </FormItem>
         )}
       />

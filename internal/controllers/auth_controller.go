@@ -2,7 +2,9 @@ package controllers
 
 import (
 	"errors"
+	"fmt"
 
+	"keizer-auth/internal/models"
 	"keizer-auth/internal/services"
 	"keizer-auth/internal/utils"
 	"keizer-auth/internal/validators"
@@ -27,20 +29,27 @@ func (ac *AuthController) SignIn(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
 	}
 
-	isValid, userDetails, err := ac.authService.VerifyPassword(body.Email, body.Password)
+	isValid, user, err := ac.authService.VerifyPassword(
+		body.Email,
+		body.Password,
+	)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Internal Server Error"})
+		return c.
+			Status(fiber.StatusInternalServerError).
+			JSON(fiber.Map{"error": "Internal Server Error"})
 	}
 	if !isValid {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid email or password"})
 	}
 
-	sessionId, err := ac.sessionService.CreateSession(userDetails.ID.String())
+	sessionId, err := ac.sessionService.CreateSession(user)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create session"})
+		return c.
+			Status(fiber.StatusInternalServerError).
+			JSON(fiber.Map{"error": "Failed to create session"})
 	}
-	utils.SetSessionCookie(c, sessionId)
 
+	utils.SetSessionCookie(c, sessionId)
 	return c.JSON(fiber.Map{"message": "signed in successfully"})
 }
 
@@ -55,7 +64,9 @@ func (ac *AuthController) SignUp(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"errors": errors})
 	}
 
-	if err := ac.authService.RegisterUser(user); err != nil {
+	id, err := ac.authService.RegisterUser(user)
+	if err != nil {
+		fmt.Print("&+v\n", err)
 		if errors.Is(err, gorm.ErrCheckConstraintViolated) {
 			return c.
 				Status(fiber.StatusBadRequest).
@@ -69,7 +80,7 @@ func (ac *AuthController) SignUp(c *fiber.Ctx) error {
 			JSON(fiber.Map{"error": "Failed to sign up user"})
 	}
 
-	return c.JSON(fiber.Map{"message": "User Signed Up!"})
+	return c.JSON(fiber.Map{"id": id, "message": "User Signed Up!"})
 }
 
 func (ac *AuthController) VerifyOTP(c *fiber.Ctx) error {
@@ -79,31 +90,55 @@ func (ac *AuthController) VerifyOTP(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
 	}
 
-	isOtpValid, err := ac.authService.VerifyOTP(verifyOtpBody)
+	userID, isOtpValid, err := ac.authService.VerifyOTP(verifyOtpBody)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "OTP not found"})
-		}
-		if err.Error() == "otp expired" {
-			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "OTP expired"})
+		if errors.Is(err, gorm.ErrRecordNotFound) || err.Error() == "otp expired" {
+			return c.
+				Status(fiber.StatusNotFound).
+				JSON(fiber.Map{"error": "OTP expired"})
 		}
 
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to verify OTP"})
+		return c.
+			Status(fiber.StatusInternalServerError).
+			JSON(fiber.Map{"error": "Failed to verify OTP"})
 	}
+
 	if !isOtpValid {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "OTP not valid"})
+		return c.
+			Status(fiber.StatusUnauthorized).
+			JSON(fiber.Map{"error": "OTP not valid"})
 	}
 
-	err = ac.authService.SetIsVerified(verifyOtpBody.Id)
+	user, err := ac.authService.SetIsVerified(userID)
 	if err != nil {
 		return err
 	}
 
-	sessionId, err := ac.sessionService.CreateSession(verifyOtpBody.Id)
+	sessionID, err := ac.sessionService.CreateSession(user)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create session"})
+		return c.
+			Status(fiber.StatusInternalServerError).
+			JSON(fiber.Map{"error": "Failed to create session"})
 	}
-	utils.SetSessionCookie(c, sessionId)
 
+	utils.SetSessionCookie(c, sessionID)
 	return c.JSON(fiber.Map{"message": "OTP Verified!"})
+}
+
+func (ac *AuthController) VerifyTokenHandler(c *fiber.Ctx) error {
+	sessionID := utils.GetSessionCookie(c)
+	if sessionID == "" {
+		return c.
+			Status(fiber.StatusUnauthorized).
+			JSON(fiber.Map{"error": "Unauthorized"})
+	}
+
+	user := new(models.User)
+	if err := ac.sessionService.GetSession(sessionID, user); err != nil {
+		return c.
+			Status(fiber.StatusUnauthorized).
+			JSON(fiber.Map{"error": "Unauthorized"})
+	}
+
+	return c.JSON(user)
 }

@@ -4,6 +4,7 @@ import apiClient from "~/axios";
 import type { emailPassSignUpSchema } from "~/schema/auth";
 
 interface SignUpRes {
+  id: string;
   message: string;
 }
 

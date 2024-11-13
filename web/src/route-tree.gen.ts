@@ -14,6 +14,7 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as AuthImport } from './routes/_auth'
 import { Route as IndexImport } from './routes/index'
 import { Route as AuthSignUpImport } from './routes/_auth/sign-up'
+import { Route as AuthVerifyOtpIdImport } from './routes/_auth/verify-otp/$id'
 
 // Create/Update Routes
 
@@ -31,6 +32,12 @@ const IndexRoute = IndexImport.update({
 const AuthSignUpRoute = AuthSignUpImport.update({
   id: '/sign-up',
   path: '/sign-up',
+  getParentRoute: () => AuthRoute,
+} as any)
+
+const AuthVerifyOtpIdRoute = AuthVerifyOtpIdImport.update({
+  id: '/verify-otp/$id',
+  path: '/verify-otp/$id',
   getParentRoute: () => AuthRoute,
 } as any)
 
@@ -59,6 +66,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignUpImport
       parentRoute: typeof AuthImport
     }
+    '/_auth/verify-otp/$id': {
+      id: '/_auth/verify-otp/$id'
+      path: '/verify-otp/$id'
+      fullPath: '/verify-otp/$id'
+      preLoaderRoute: typeof AuthVerifyOtpIdImport
+      parentRoute: typeof AuthImport
+    }
   }
 }
 
@@ -66,10 +80,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthRouteChildren {
   AuthSignUpRoute: typeof AuthSignUpRoute
+  AuthVerifyOtpIdRoute: typeof AuthVerifyOtpIdRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthSignUpRoute: AuthSignUpRoute,
+  AuthVerifyOtpIdRoute: AuthVerifyOtpIdRoute,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
@@ -78,12 +94,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '': typeof AuthRouteWithChildren
   '/sign-up': typeof AuthSignUpRoute
+  '/verify-otp/$id': typeof AuthVerifyOtpIdRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '': typeof AuthRouteWithChildren
   '/sign-up': typeof AuthSignUpRoute
+  '/verify-otp/$id': typeof AuthVerifyOtpIdRoute
 }
 
 export interface FileRoutesById {
@@ -91,14 +109,15 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_auth': typeof AuthRouteWithChildren
   '/_auth/sign-up': typeof AuthSignUpRoute
+  '/_auth/verify-otp/$id': typeof AuthVerifyOtpIdRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '' | '/sign-up'
+  fullPaths: '/' | '' | '/sign-up' | '/verify-otp/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '' | '/sign-up'
-  id: '__root__' | '/' | '/_auth' | '/_auth/sign-up'
+  to: '/' | '' | '/sign-up' | '/verify-otp/$id'
+  id: '__root__' | '/' | '/_auth' | '/_auth/sign-up' | '/_auth/verify-otp/$id'
   fileRoutesById: FileRoutesById
 }
 
@@ -132,11 +151,16 @@ export const routeTree = rootRoute
     "/_auth": {
       "filePath": "_auth.tsx",
       "children": [
-        "/_auth/sign-up"
+        "/_auth/sign-up",
+        "/_auth/verify-otp/$id"
       ]
     },
     "/_auth/sign-up": {
       "filePath": "_auth/sign-up.tsx",
+      "parent": "/_auth"
+    },
+    "/_auth/verify-otp/$id": {
+      "filePath": "_auth/verify-otp/$id.tsx",
       "parent": "/_auth"
     }
   }

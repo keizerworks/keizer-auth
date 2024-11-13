@@ -1,8 +1,9 @@
 package repositories
 
 import (
-	"keizer-auth/internal/database"
 	"time"
+
+	"keizer-auth/internal/database"
 )
 
 type RedisRepository struct {
@@ -19,9 +20,13 @@ func (rr *RedisRepository) Get(key string) (string, error) {
 }
 
 // set a key's value with expiration
-func (rr *RedisRepository) Set(key string, value string, expiration time.Duration) error {
+func (rr *RedisRepository) Set(key string, value interface{}, expiration time.Duration) error {
 	err := rr.rds.RedisClient.Set(rr.rds.Ctx, key, value, expiration).Err()
 	return err
+}
+
+func (rr *RedisRepository) Expire(key string, expiration time.Duration) error {
+	return rr.rds.RedisClient.Expire(rr.rds.Ctx, key, expiration).Err()
 }
 
 func (rr *RedisRepository) TTL(key string) (time.Duration, error) {

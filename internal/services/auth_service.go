@@ -1,15 +1,18 @@
 package services
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"time"
-
-	"github.com/redis/go-redis/v9"
 
 	"keizer-auth/internal/models"
 	"keizer-auth/internal/repositories"
 	"keizer-auth/internal/utils"
 	"keizer-auth/internal/validators"
+
+	"github.com/nrednav/cuid2"
+	"github.com/redis/go-redis/v9"
 )
 
 type AuthService struct {
@@ -21,45 +24,78 @@ func NewAuthService(userRepo *repositories.UserRepository, redisRepo *repositori
 	return &AuthService{userRepo: userRepo, redisRepo: redisRepo}
 }
 
-func (as *AuthService) RegisterUser(userRegister *validators.SignUpUser) error {
+func (as *AuthService) RegisterUser(
+	userRegister *validators.SignUpUser,
+) (string, error) {
+	user := models.User{
+		Email: userRegister.Email,
+	}
+
+	fmt.Print(user)
+	fmt.Print(user.IsVerified)
+	err := as.userRepo.GetUserByStruct(&user)
+	if err != nil {
+		return "", err
+	}
+
+	if user.IsVerified {
+		return "", fmt.Errorf("uesr already exists")
+	}
+
 	passwordHash, err := utils.HashPassword(userRegister.Password)
 	if err != nil {
-		return fmt.Errorf("failed to hash password: %w", err)
+		return "", fmt.Errorf("failed to hash password: %w", err)
 	}
+
+	user.FirstName = userRegister.FirstName
+	user.LastName = userRegister.LastName
+	user.PasswordHash = passwordHash
 
 	otp, err := utils.GenerateOTP()
 	if err != nil {
-		return fmt.Errorf("failed to generate OTP: %w", err)
+		return "", fmt.Errorf("failed to generate OTP: %w", err)
 	}
 
-	err = as.redisRepo.Set("registration-verification-otp-"+userRegister.Email, otp, time.Minute)
+	otpCacheKey := cuid2.Generate()
+	hashOtp, err := utils.HashPassword(otp)
 	if err != nil {
-		return fmt.Errorf("failed to save otp in redis: %w", err)
+		return "", fmt.Errorf("failed to hash OTP: %w", err)
 	}
 
-	// TODO: email should be sent using async func
-	if err = SendOTPEmail(userRegister.Email, otp); err != nil {
-		return fmt.Errorf("failed to send OTP email: %w", err)
+	err = as.userRepo.CreateUser(&user)
+	if err != nil {
+		return "", err
 	}
 
-	if err = as.userRepo.CreateUser(&models.User{
-		Email:        userRegister.Email,
-		FirstName:    userRegister.FirstName,
-		LastName:     userRegister.LastName,
-		PasswordHash: passwordHash,
-	}); err != nil {
-		return err
+	otpData := models.OTPData{
+		OTPHash: hashOtp,
+		ID:      user.ID.String(),
 	}
 
-	return nil
+	marshalledOtpData, err := json.Marshal(otpData)
+	if err != nil {
+		return "", err
+	}
+
+	encodedOtpData := base64.StdEncoding.EncodeToString(marshalledOtpData)
+	err = as.redisRepo.Set(otpCacheKey, encodedOtpData, time.Minute*3)
+	if err != nil {
+		return "", fmt.Errorf("failed to save otp in redis: %w", err)
+	}
+
+	// TODO: track status, add reties
+	go SendOTPEmail(userRegister.Email, otp)
+
+	return otpCacheKey, nil
 }
 
 func (as *AuthService) VerifyPassword(email string, password string) (bool, *models.User, error) {
-	user, err := as.userRepo.GetUserByStruct(&models.User{Email: email})
+	user := models.User{Email: email}
+	err := as.userRepo.GetUserByStruct(&user)
 	if err != nil {
 		return false, nil, err
 	}
-	if user == nil {
+	if user.ID.String() == "" {
 		return false, nil, err
 	}
 
@@ -71,24 +107,35 @@ func (as *AuthService) VerifyPassword(email string, password string) (bool, *mod
 		return false, nil, nil
 	}
 
-	return true, user, nil
+	return true, &user, nil
 }
 
-func (as *AuthService) VerifyOTP(verifyOtpBody *validators.VerifyOTP) (bool, error) {
-	val, err := as.redisRepo.Get("registration-verification-otp-" + verifyOtpBody.Email)
+func (as *AuthService) VerifyOTP(verifyOtpBody *validators.VerifyOTP) (string, bool, error) {
+	encodedOtpData, err := as.redisRepo.Get(verifyOtpBody.Id)
 	if err != nil {
 		if err == redis.Nil {
-			return false, fmt.Errorf("otp expired")
+			return "", false, fmt.Errorf("otp expired")
 		}
-		return false, fmt.Errorf("failed to get otp from redis %w", err)
+		return "", false, fmt.Errorf("failed to get otp from redis %w", err)
 	}
 
-	if val != verifyOtpBody.Otp {
-		return false, nil
+	decodedOtpData, err := base64.StdEncoding.DecodeString(encodedOtpData)
+	if err != nil {
+		return "", false, fmt.Errorf("failed to decode otp data: %w", err)
 	}
-	return true, nil
+
+	var otpData models.OTPData
+	err = json.Unmarshal(decodedOtpData, &otpData)
+	if err != nil {
+		return "", false, fmt.Errorf("failed to unmarshal otp data: %w", err)
+	}
+
+	isVerified, err := utils.VerifyPassword(verifyOtpBody.Otp, otpData.OTPHash)
+	return otpData.ID, isVerified, err
 }
 
-func (as *AuthService) SetIsVerified(id string) error {
-	return as.userRepo.UpdateUser(id, &models.User{IsVerified: true})
+func (as *AuthService) SetIsVerified(id string) (*models.User, error) {
+	user := models.User{IsVerified: true}
+	err := as.userRepo.UpdateUser(id, &user)
+	return &user, err
 }
