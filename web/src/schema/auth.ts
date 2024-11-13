@@ -34,6 +34,11 @@ export const emailPassSignInSchema = z.object({
     ),
 });
 
+export const verifyOtpSchema = z.object({
+  id: z.string(),
+  otp: z.string().length(6),
+});
+
 export const emailVerifyCodeSchema = z.object({
   code: z.string().length(6),
   email: z.string().email(),

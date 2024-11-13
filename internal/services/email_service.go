@@ -36,7 +36,7 @@ func (es *EmailService) SendEmail(
 	to string,
 	subject string,
 	body string,
-) error {
+) {
 	message := []byte("To: " + to + "\r\n" +
 		"Subject: " + subject + "\r\n" +
 		"\r\n" +
@@ -52,16 +52,11 @@ func (es *EmailService) SendEmail(
 		[]string{to},
 		message,
 	); err != nil {
-		return fmt.Errorf("failed to send email: %w", err)
+		fmt.Print("failed to send email: %w", err)
 	}
-	return nil
 }
 
-func SendOTPEmail(to string, otp string) error {
+func SendOTPEmail(to string, otp string) {
 	emailService := NewEmailService()
-	err := emailService.SendEmail(to, "OTP Verification", "Your OTP is "+otp)
-	if err != nil {
-		return err
-	}
-	return nil
+	emailService.SendEmail(to, "OTP Verification", "Your OTP is "+otp)
 }

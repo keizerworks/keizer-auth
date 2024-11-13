@@ -48,6 +48,8 @@ func HashPassword(password string) (string, error) {
 
 func VerifyPassword(password, encodedHash string) (bool, error) {
 	parts := strings.Split(encodedHash, ".")
+	fmt.Print(parts)
+	fmt.Print(len(parts))
 	if len(parts) != 2 {
 		return false, fmt.Errorf("invalid hash format")
 	}

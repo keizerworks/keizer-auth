@@ -11,6 +11,7 @@ apiClient.interceptors.request.use((config) => {
     config.headers["Content-Type"] = "application/json";
   }
 
+  config.withCredentials = true;
   config.headers.Accept = "application/json";
   return config;
 });

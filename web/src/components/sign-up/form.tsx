@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GitHubLogoIcon } from "@radix-ui/react-icons";
 import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "@tanstack/react-router";
 import { AxiosError } from "axios";
 import * as React from "react";
 import { useForm } from "react-hook-form";
@@ -22,13 +23,21 @@ type UserAuthFormProps = React.HTMLAttributes<HTMLDivElement>;
 type EmailSignUpSchema = z.infer<typeof emailPassSignUpSchema>;
 
 export function SignUpForm({ className, ...props }: UserAuthFormProps) {
+  const router = useRouter();
+
   const form = useForm<EmailSignUpSchema>({
     resolver: zodResolver(emailPassSignUpSchema),
   });
 
   const { mutate, isPending } = useMutation({
     mutationFn: signUpMutationFn,
-    onSuccess: (res) => toast.success(res.message),
+    onSuccess: (res) => {
+      toast.success(res.message);
+      router.navigate({
+        to: "/verify-otp/$id",
+        params: { id: res.id },
+      });
+    },
     onError: (err) => {
       if (err instanceof AxiosError) {
         if (err.response?.data?.errors) {

@@ -3,10 +3,11 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"keizer-auth/internal/models"
 	"keizer-auth/internal/repositories"
 	"keizer-auth/internal/utils"
-	"time"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -20,41 +21,43 @@ func NewSessionService(redisRepo *repositories.RedisRepository, userRepo *reposi
 	return &SessionService{redisRepo: redisRepo, userRepo: userRepo}
 }
 
-func (ss *SessionService) CreateSession(uuid string) (string, error) {
-	sessionId, err := utils.GenerateSessionID()
+func (ss *SessionService) CreateSession(user *models.User) (string, error) {
+	sessionID, err := utils.GenerateSessionID()
 	if err != nil {
 		return "", fmt.Errorf("error in generating session %w", err)
 	}
 
-	var user *models.User
-	user, err = ss.userRepo.GetUser(uuid)
-	if err != nil {
-		return "", fmt.Errorf("error in getting user %w", err)
-	}
 	userJson, err := json.Marshal(user)
 	if err != nil {
 		return "", fmt.Errorf("error occured %w", err)
 	}
 
-	err = ss.redisRepo.Set("dashboard-user-session-"+sessionId, string(userJson), utils.SessionExpiresIn)
+	err = ss.redisRepo.Set(
+		"dashboard-user-session-"+sessionID,
+		string(userJson),
+		utils.SessionExpiresIn,
+	)
 	if err != nil {
 		return "", fmt.Errorf("error in setting session %w", err)
 	}
 
-	return sessionId, nil
+	return sessionID, nil
 }
 
-func (ss *SessionService) GetSession(sessionId string) (*models.User, error) {
+func (ss *SessionService) GetSession(
+	sessionId string,
+	user *models.User,
+) error {
 	userSession, err := ss.redisRepo.Get("dashboard-user-session-" + sessionId)
 	if err != nil {
-		return nil, fmt.Errorf("no session found")
+		return fmt.Errorf("no session found")
 	}
-	var userData *models.User
-	err = json.Unmarshal([]byte(userSession), userData)
-	if err != nil {
-		return nil, fmt.Errorf("error in unmarshalling")
+
+	if err = json.Unmarshal([]byte(userSession), user); err != nil {
+		return fmt.Errorf("error in unmarshalling")
 	}
-	return userData, nil
+
+	return nil
 }
 
 func (ss *SessionService) UpdateSession(sessionId string) error {
@@ -65,8 +68,11 @@ func (ss *SessionService) UpdateSession(sessionId string) error {
 		}
 		return err
 	}
-	err = ss.redisRepo.Set("dashboard-user-session-"+sessionId, val, utils.SessionExpiresIn)
-	if err != nil {
+	if err = ss.redisRepo.Set(
+		"dashboard-user-session-"+sessionId,
+		val,
+		utils.SessionExpiresIn,
+	); err != nil {
 		return fmt.Errorf("error in updating session %w", err)
 	}
 	return nil

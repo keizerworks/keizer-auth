@@ -2,9 +2,11 @@ package repositories
 
 import (
 	"fmt"
+
 	"keizer-auth/internal/models"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type UserRepository struct {
@@ -16,7 +18,12 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 }
 
 func (r *UserRepository) CreateUser(user *models.User) error {
-	return r.db.Create(user).Error
+	error := r.
+		db.Model(&user).
+		Clauses(clause.Returning{}).
+		Create(user).
+		Error
+	return error
 }
 
 func (r *UserRepository) GetUser(uuid string) (*models.User, error) {
@@ -32,19 +39,30 @@ func (r *UserRepository) GetUser(uuid string) (*models.User, error) {
 	return user, nil
 }
 
-func (r *UserRepository) GetUserByStruct(query *models.User) (*models.User, error) {
-	user := new(models.User)
-	result := r.db.Where(query).First(user)
+func (r *UserRepository) GetUserByEmail(user *models.User) error {
+	result := r.db.Where(user).First(user)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
-			return nil, nil
+			return nil
 		}
-		return nil, fmt.Errorf("error in getting user: %w", result.Error)
+		return fmt.Errorf("error in getting user: %w", result.Error)
 	}
 
-	return user, nil
+	return nil
 }
 
-func (r *UserRepository) UpdateUser(id string, updates *models.User) error {
-	return r.db.Model(&models.User{}).Where("id = ?", id).Updates(updates).Error
+func (r *UserRepository) GetUserByStruct(user *models.User) error {
+	result := r.db.Where(user).First(user)
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil
+		}
+		return fmt.Errorf("error in getting user: %w", result.Error)
+	}
+
+	return nil
+}
+
+func (r *UserRepository) UpdateUser(id string, user *models.User) error {
+	return r.db.Model(user).Clauses(clause.Returning{}).Where("id = ?", id).Updates(user).Error
 }
