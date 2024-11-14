@@ -54,8 +54,8 @@ func (ac *AuthController) SignIn(c *fiber.Ctx) error {
 	}
 
 	isValid, err := ac.authService.VerifyPassword(
-		user.PasswordHash,
 		body.Password,
+		user.PasswordHash,
 	)
 	if err != nil {
 		return c.
