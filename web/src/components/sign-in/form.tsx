@@ -10,9 +10,9 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { signUpMutationFn } from "~/actions/auth/sign-up";
+import { signInMutationFn } from "~/actions/auth/sign-in";
 import { cn } from "~/lib/utils";
-import { emailPassSignUpSchema } from "~/schema/auth";
+import { emailPassSignInSchema } from "~/schema/auth";
 
 import { Button } from "../ui/button";
 import { Form, FormField } from "../ui/form";
@@ -20,23 +20,20 @@ import { Input } from "../ui/input";
 import { PasswordInput } from "../ui/password-input";
 
 type UserAuthFormProps = React.HTMLAttributes<HTMLDivElement>;
-type EmailSignUpSchema = z.infer<typeof emailPassSignUpSchema>;
+type EmailSignInSchema = z.infer<typeof emailPassSignInSchema>;
 
-export function SignUpForm({ className, ...props }: UserAuthFormProps) {
+export function SignInForm({ className, ...props }: UserAuthFormProps) {
   const router = useRouter();
 
-  const form = useForm<EmailSignUpSchema>({
-    resolver: zodResolver(emailPassSignUpSchema),
+  const form = useForm<EmailSignInSchema>({
+    resolver: zodResolver(emailPassSignInSchema),
   });
 
   const { mutate, isPending } = useMutation({
-    mutationFn: signUpMutationFn,
+    mutationFn: signInMutationFn,
     onSuccess: (res) => {
       toast.success(res.message);
-      router.navigate({
-        to: "/verify-otp/$id",
-        params: { id: res.id },
-      });
+      router.navigate({ to: "/" });
     },
     onError: (err) => {
       if (err instanceof AxiosError) {
@@ -52,7 +49,7 @@ export function SignUpForm({ className, ...props }: UserAuthFormProps) {
 
             if (errorMessage) {
               form.setError(
-                field as keyof EmailSignUpSchema,
+                field as keyof EmailSignInSchema,
                 { message: errorMessage },
                 { shouldFocus: shouldFocus },
               );
@@ -70,7 +67,7 @@ export function SignUpForm({ className, ...props }: UserAuthFormProps) {
     },
   });
 
-  async function onSubmit(data: EmailSignUpSchema) {
+  async function onSubmit(data: EmailSignInSchema) {
     mutate(data);
   }
 
@@ -78,22 +75,6 @@ export function SignUpForm({ className, ...props }: UserAuthFormProps) {
     <div className={cn("grid gap-6", className)} {...props}>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="first_name"
-              label="First Name"
-              render={({ field }) => <Input {...field} />}
-            />
-
-            <FormField
-              control={form.control}
-              name="last_name"
-              label="Last Name"
-              render={({ field }) => <Input {...field} />}
-            />
-          </div>
-
           <FormField
             control={form.control}
             name="email"
@@ -109,7 +90,7 @@ export function SignUpForm({ className, ...props }: UserAuthFormProps) {
           />
 
           <Button loading={isPending} type="submit" className="mt-4 w-full">
-            Sign Up
+            Sign In
           </Button>
         </form>
       </Form>

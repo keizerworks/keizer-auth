@@ -89,25 +89,11 @@ func (as *AuthService) RegisterUser(
 	return otpCacheKey, nil
 }
 
-func (as *AuthService) VerifyPassword(email string, password string) (bool, *models.User, error) {
-	user := models.User{Email: email}
-	err := as.userRepo.GetUserByStruct(&user)
-	if err != nil {
-		return false, nil, err
-	}
-	if user.ID.String() == "" {
-		return false, nil, err
-	}
-
-	isValid, err := utils.VerifyPassword(password, user.PasswordHash)
-	if err != nil {
-		return false, nil, err
-	}
-	if !isValid {
-		return false, nil, nil
-	}
-
-	return true, &user, nil
+func (as *AuthService) VerifyPassword(
+	password string,
+	passwordHash string,
+) (bool, error) {
+	return utils.VerifyPassword(password, passwordHash)
 }
 
 func (as *AuthService) VerifyOTP(verifyOtpBody *validators.VerifyOTP) (string, bool, error) {
@@ -137,5 +123,11 @@ func (as *AuthService) VerifyOTP(verifyOtpBody *validators.VerifyOTP) (string, b
 func (as *AuthService) SetIsVerified(id string) (*models.User, error) {
 	user := models.User{IsVerified: true}
 	err := as.userRepo.UpdateUser(id, &user)
+	return &user, err
+}
+
+func (as *AuthService) GetUser(email string) (*models.User, error) {
+	user := models.User{Email: email}
+	err := as.userRepo.GetUserByStruct(&user)
 	return &user, err
 }
