@@ -3,6 +3,7 @@ package controllers
 import (
 	"errors"
 	"fmt"
+
 	"keizer-auth/internal/models"
 	"keizer-auth/internal/services"
 	"keizer-auth/internal/utils"

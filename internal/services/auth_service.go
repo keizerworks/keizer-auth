@@ -4,11 +4,12 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"keizer-auth/internal/models"
 	"keizer-auth/internal/repositories"
 	"keizer-auth/internal/utils"
 	"keizer-auth/internal/validators"
-	"time"
 
 	"github.com/nrednav/cuid2"
 	"github.com/redis/go-redis/v9"

@@ -126,7 +126,7 @@ export function SignUpForm({ className, ...props }: UserAuthFormProps) {
       </div>
 
       <Button disabled variant="outline" type="button">
-        <GitHubLogoIcon className="mr-2 h-4 w-4" /> GitHub
+        <GitHubLogoIcon className="size-4" /> GitHub
       </Button>
     </div>
   );
