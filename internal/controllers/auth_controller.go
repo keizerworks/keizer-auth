@@ -3,7 +3,6 @@ package controllers
 import (
 	"errors"
 	"fmt"
-
 	"keizer-auth/internal/models"
 	"keizer-auth/internal/services"
 	"keizer-auth/internal/utils"
@@ -26,27 +25,54 @@ func (ac *AuthController) SignIn(c *fiber.Ctx) error {
 	body := new(validators.SignInUser)
 
 	if err := c.BodyParser(body); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
+		return c.
+			Status(fiber.StatusBadRequest).
+			JSON(fiber.Map{"error": "Invalid request body"})
 	}
 
-	isValid, user, err := ac.authService.VerifyPassword(
-		body.Email,
+	user, err := ac.authService.GetUser(body.Email)
+	if err != nil {
+		return c.
+			Status(fiber.StatusInternalServerError).
+			JSON(fiber.Map{
+				"error": "Unable to retrieve user information. Please try again later.",
+			})
+	}
+	if user.ID.String() == "" {
+		return c.
+			Status(fiber.StatusInternalServerError).
+			JSON(fiber.Map{
+				"error": "User not found. Please check your email and try again.",
+			})
+	}
+	if !user.IsVerified {
+		return c.
+			Status(fiber.StatusInternalServerError).
+			JSON(fiber.Map{
+				"error": "User is not verified. Please verify your account before signing in.",
+			})
+	}
+
+	isValid, err := ac.authService.VerifyPassword(
+		user.PasswordHash,
 		body.Password,
 	)
 	if err != nil {
 		return c.
 			Status(fiber.StatusInternalServerError).
-			JSON(fiber.Map{"error": "Internal Server Error"})
+			JSON(fiber.Map{"error": "Unable to verify password. Please try again later."})
 	}
 	if !isValid {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid email or password"})
+		return c.
+			Status(fiber.StatusUnauthorized).
+			JSON(fiber.Map{"error": "Invalid email or password. Please try again."})
 	}
 
 	sessionId, err := ac.sessionService.CreateSession(user)
 	if err != nil {
 		return c.
 			Status(fiber.StatusInternalServerError).
-			JSON(fiber.Map{"error": "Failed to create session"})
+			JSON(fiber.Map{"error": "Something went wrong, Failed to create session"})
 	}
 
 	utils.SetSessionCookie(c, sessionId)
