@@ -1,12 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { verifyTokenQueryFn } from "~/actions/auth/verify-token";
-
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_authenticated/")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  verifyTokenQueryFn();
   return "Hello /!";
 }

@@ -3,7 +3,6 @@ package controllers
 import (
 	"errors"
 	"fmt"
-
 	"keizer-auth/internal/models"
 	"keizer-auth/internal/services"
 	"keizer-auth/internal/utils"
@@ -65,7 +64,7 @@ func (ac *AuthController) SignIn(c *fiber.Ctx) error {
 	}
 	if !isValid {
 		return c.
-			Status(fiber.StatusUnauthorized).
+			Status(fiber.StatusBadRequest).
 			JSON(fiber.Map{"error": "Invalid email or password. Please try again."})
 	}
 
@@ -76,8 +75,9 @@ func (ac *AuthController) SignIn(c *fiber.Ctx) error {
 			JSON(fiber.Map{"error": "Something went wrong, Failed to create session"})
 	}
 
+	fmt.Print(sessionId)
 	utils.SetSessionCookie(c, sessionId)
-	return c.JSON(fiber.Map{"message": "signed in successfully"})
+	return c.JSON(user)
 }
 
 func (ac *AuthController) SignUp(c *fiber.Ctx) error {
@@ -149,11 +149,13 @@ func (ac *AuthController) VerifyOTP(c *fiber.Ctx) error {
 	}
 
 	utils.SetSessionCookie(c, sessionID)
-	return c.JSON(fiber.Map{"message": "OTP Verified!"})
+	return c.JSON(user)
 }
 
 func (ac *AuthController) VerifyTokenHandler(c *fiber.Ctx) error {
 	sessionID := utils.GetSessionCookie(c)
+	fmt.Print("\n")
+	fmt.Print(sessionID)
 	if sessionID == "" {
 		return c.
 			Status(fiber.StatusUnauthorized).

@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -10,16 +9,8 @@ import (
 
 const SessionExpiresIn = 30 * 24 * time.Hour
 
-func GenerateSessionID() (string, error) {
-	generate, err := cuid2.Init(
-		cuid2.WithLength(15),
-	)
-	if err != nil {
-		fmt.Println(err.Error())
-		return "", err
-	}
-
-	return generate(), nil
+func GenerateSessionID() string {
+	return cuid2.Generate()
 }
 
 func SetSessionCookie(c *fiber.Ctx, sessionID string) {
@@ -28,11 +19,9 @@ func SetSessionCookie(c *fiber.Ctx, sessionID string) {
 		Value:    sessionID,
 		Expires:  time.Now().Add(SessionExpiresIn),
 		HTTPOnly: true,
-		Secure:   true,
+		Secure:   false,
 		SameSite: fiber.CookieSameSiteNoneMode,
 		// TODO: handle domain
-		Domain: "localhost",
-		Path:   "/",
 	})
 }
 

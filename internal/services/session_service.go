@@ -3,11 +3,10 @@ package services
 import (
 	"encoding/json"
 	"fmt"
-	"time"
-
 	"keizer-auth/internal/models"
 	"keizer-auth/internal/repositories"
 	"keizer-auth/internal/utils"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -22,22 +21,18 @@ func NewSessionService(redisRepo *repositories.RedisRepository, userRepo *reposi
 }
 
 func (ss *SessionService) CreateSession(user *models.User) (string, error) {
-	sessionID, err := utils.GenerateSessionID()
-	if err != nil {
-		return "", fmt.Errorf("error in generating session %w", err)
-	}
+	sessionID := utils.GenerateSessionID()
 
 	userJson, err := json.Marshal(user)
 	if err != nil {
 		return "", fmt.Errorf("error occured %w", err)
 	}
 
-	err = ss.redisRepo.Set(
+	if err = ss.redisRepo.Set(
 		"dashboard-user-session-"+sessionID,
 		string(userJson),
 		utils.SessionExpiresIn,
-	)
-	if err != nil {
+	); err != nil {
 		return "", fmt.Errorf("error in setting session %w", err)
 	}
 

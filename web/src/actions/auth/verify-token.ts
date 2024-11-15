@@ -1,7 +1,7 @@
 import apiClient from "~/axios";
+import { UserInterface } from "~/schema/user";
 
-export const verifyTokenQueryFn = async () =>
+export const verifyToken = async () =>
   await apiClient
-    .get("auth/verify-token")
-    .then((res) => console.log(res.data))
-    .catch(console.log);
+    .get<UserInterface>("auth/verify-token")
+    .then((res) => res.data);
