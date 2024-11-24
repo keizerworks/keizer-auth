@@ -11,6 +11,7 @@ import {
   VerifyOtpInterface,
   verifyOtpMutationFn,
 } from "~/actions/auth/verify-otp";
+import { setUser } from "~/global-state/persistant-storage/token";
 import { cn } from "~/lib/utils";
 import { verifyOtpSchema } from "~/schema/auth";
 
@@ -32,7 +33,10 @@ export function VerifyOtpForm({ id, className, ...props }: UserAuthFormProps) {
 
   const { mutate, isPending } = useMutation({
     mutationFn: verifyOtpMutationFn,
-    onSuccess: (res) => toast.success(res.message),
+    onSuccess: (res) => {
+      setUser(res);
+      toast.success("OTP verified!");
+    },
     onError: (err) => {
       let errMessage = "An unknown error occurred.";
       if (err instanceof AxiosError && err.response?.data?.error)
