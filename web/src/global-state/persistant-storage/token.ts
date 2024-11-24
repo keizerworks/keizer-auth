@@ -2,7 +2,7 @@ import Cookies from "js-cookie";
 import { create } from "zustand";
 import { persist, StorageValue } from "zustand/middleware";
 
-import { verifyToken } from "~/actions/auth/verify-token";
+import { profile } from "~/actions/auth/profile";
 import { UserInterface } from "~/schema/user";
 
 import { createSelectors } from "../zustand";
@@ -17,17 +17,9 @@ const _useUserStore = create<UserStoreInterface>()(
   persist(
     (set) => ({
       data: null,
-      signIn: (data: UserInterface) => {
-        set({ data });
-      },
       setData: (data: UserInterface) => set({ data }),
-      setProfileImage: (profileImage: string) =>
-        set((state) => ({
-          data: state.data
-            ? { ...state.data, profile_image: profileImage }
-            : null,
-        })),
       logout: () => {
+        // TODO:
         Cookies.remove("user-storage");
         set({ data: null });
         window.location.reload();
@@ -42,7 +34,7 @@ const _useUserStore = create<UserStoreInterface>()(
             let data: StorageValue<UserInterface>;
             if (!str) {
               data = {
-                state: await verifyToken(),
+                state: await profile(),
                 version: 0,
               };
               setUser(data.state);

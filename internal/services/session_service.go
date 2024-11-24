@@ -16,7 +16,10 @@ type SessionService struct {
 	userRepo  *repositories.UserRepository
 }
 
-func NewSessionService(redisRepo *repositories.RedisRepository, userRepo *repositories.UserRepository) *SessionService {
+func NewSessionService(
+	redisRepo *repositories.RedisRepository,
+	userRepo *repositories.UserRepository,
+) *SessionService {
 	return &SessionService{redisRepo: redisRepo, userRepo: userRepo}
 }
 

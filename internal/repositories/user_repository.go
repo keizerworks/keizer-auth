@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"fmt"
-
 	"keizer-auth/internal/models"
 
 	"gorm.io/gorm"
@@ -37,18 +36,6 @@ func (r *UserRepository) GetUser(uuid string) (*models.User, error) {
 	}
 
 	return user, nil
-}
-
-func (r *UserRepository) GetUserByEmail(user *models.User) error {
-	result := r.db.Where(user).First(user)
-	if result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			return nil
-		}
-		return fmt.Errorf("error in getting user: %w", result.Error)
-	}
-
-	return nil
 }
 
 func (r *UserRepository) GetUserByStruct(user *models.User) error {

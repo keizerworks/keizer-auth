@@ -1,9 +1,8 @@
 package validators
 
 import (
-	"unicode"
-
 	"keizer-auth/internal/utils"
+	"unicode"
 
 	"github.com/gookit/validate"
 )
@@ -38,7 +37,7 @@ type SignUpUser struct {
 	LastName  string `json:"last_name" validate:"maxLen:32" label:"Last Name"`
 }
 
-func (f SignUpUser) Messages() map[string]string {
+func (f *SignUpUser) Messages() map[string]string {
 	return validate.MS{
 		// Global messages
 		"required": "{field} is required",
@@ -66,4 +65,14 @@ func (u *SignUpUser) Validate() (bool, map[string]map[string]string) {
 	}
 
 	return true, nil
+}
+
+type SignInUser struct {
+	Email    string `validate:"required|email" label:"Email"`
+	Password string `validate:"required|minLen:8|password" label:"Password"`
+}
+
+type VerifyOTP struct {
+	Otp string `validate:"required" label:"OTP"`
+	Id  string `validate:"required" label:"Id"`
 }

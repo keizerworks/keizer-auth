@@ -10,11 +10,13 @@ type FiberServer struct {
 	*fiber.App
 	container   *app.Container
 	controllers *app.ServerControllers
+	middlewars  *app.ServerMiddlewares
 }
 
 func New() *FiberServer {
 	container := app.GetContainer()
 	controllers := app.GetControllers(container)
+	middlewars := app.GetMiddlewares(container)
 
 	server := &FiberServer{
 		App: fiber.New(fiber.Config{
@@ -23,6 +25,7 @@ func New() *FiberServer {
 		}),
 		container:   container,
 		controllers: controllers,
+		middlewars:  middlewars,
 	}
 
 	return server

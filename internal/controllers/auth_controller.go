@@ -52,6 +52,9 @@ func (ac *AuthController) SignIn(c *fiber.Ctx) error {
 				"error": "User is not verified. Please verify your account before signing in.",
 			})
 	}
+	if user.Type != models.Dashboard {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
 
 	isValid, err := ac.authService.VerifyPassword(
 		body.Password,
@@ -75,6 +78,7 @@ func (ac *AuthController) SignIn(c *fiber.Ctx) error {
 			JSON(fiber.Map{"error": "Something went wrong, Failed to create session"})
 	}
 
+	fmt.Printf("%v", sessionId)
 	fmt.Print(sessionId)
 	utils.SetSessionCookie(c, sessionId)
 	return c.JSON(user)
@@ -152,22 +156,7 @@ func (ac *AuthController) VerifyOTP(c *fiber.Ctx) error {
 	return c.JSON(user)
 }
 
-func (ac *AuthController) VerifyTokenHandler(c *fiber.Ctx) error {
-	sessionID := utils.GetSessionCookie(c)
-	fmt.Print("\n")
-	fmt.Print(sessionID)
-	if sessionID == "" {
-		return c.
-			Status(fiber.StatusUnauthorized).
-			JSON(fiber.Map{"error": "Unauthorized"})
-	}
-
-	user := new(models.User)
-	if err := ac.sessionService.GetSession(sessionID, user); err != nil {
-		return c.
-			Status(fiber.StatusUnauthorized).
-			JSON(fiber.Map{"error": "Unauthorized"})
-	}
-
+func (ac *AuthController) Profile(c *fiber.Ctx) error {
+	user := utils.GetCurrentUser(c)
 	return c.JSON(user)
 }

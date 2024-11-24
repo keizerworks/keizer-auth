@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"keizer-auth/internal/constants"
+	"keizer-auth/internal/models"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -21,10 +23,17 @@ func SetSessionCookie(c *fiber.Ctx, sessionID string) {
 		HTTPOnly: true,
 		Secure:   false,
 		SameSite: fiber.CookieSameSiteNoneMode,
-		// TODO: handle domain
 	})
 }
 
 func GetSessionCookie(c *fiber.Ctx) string {
 	return c.Cookies("session_id", "")
+}
+
+func GetCurrentUser(c *fiber.Ctx) *models.User {
+	user, ok := c.Locals(constants.UserContextKey).(*models.User)
+	if !ok {
+		return nil
+	}
+	return user
 }

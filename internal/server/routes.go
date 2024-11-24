@@ -25,7 +25,17 @@ func (s *FiberServer) RegisterFiberRoutes() {
 	auth.Post("/sign-up", s.controllers.Auth.SignUp)
 	auth.Post("/sign-in", s.controllers.Auth.SignIn)
 	auth.Post("/verify-otp", s.controllers.Auth.VerifyOTP)
-	auth.Get("/verify-token", s.controllers.Auth.VerifyTokenHandler)
+	auth.Get("/profile", s.middlewars.Auth.Authorize, s.controllers.Auth.Profile)
+
+	// accounts handlers
+	accounts := api.Group("/accounts", s.middlewars.Auth.Authorize)
+	accounts.Post("/", s.controllers.Account.Create)
+	accounts.Get("/", s.controllers.Account.Get)
+
+	// applications handlers
+	applications := accounts.Group("/:accountId<guid>/applications")
+	applications.Post("/", s.controllers.Application.Create)
+	applications.Get("/", s.controllers.Application.Get)
 
 	s.Static("/", "./web/dist")
 	s.Static("*", "./web/dist/index.html")

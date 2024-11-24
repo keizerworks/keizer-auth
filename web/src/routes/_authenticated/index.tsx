@@ -5,5 +5,5 @@ export const Route = createFileRoute("/_authenticated/")({
 });
 
 function RouteComponent() {
-  return "Hello /!";
+  return "";
 }
