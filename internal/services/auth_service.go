@@ -4,12 +4,11 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"time"
-
 	"keizer-auth/internal/models"
 	"keizer-auth/internal/repositories"
 	"keizer-auth/internal/utils"
 	"keizer-auth/internal/validators"
+	"time"
 
 	"github.com/nrednav/cuid2"
 	"github.com/redis/go-redis/v9"
@@ -20,7 +19,10 @@ type AuthService struct {
 	redisRepo *repositories.RedisRepository
 }
 
-func NewAuthService(userRepo *repositories.UserRepository, redisRepo *repositories.RedisRepository) *AuthService {
+func NewAuthService(
+	userRepo *repositories.UserRepository,
+	redisRepo *repositories.RedisRepository,
+) *AuthService {
 	return &AuthService{userRepo: userRepo, redisRepo: redisRepo}
 }
 
@@ -29,10 +31,9 @@ func (as *AuthService) RegisterUser(
 ) (string, error) {
 	user := models.User{
 		Email: userRegister.Email,
+		Type:  models.Dashboard,
 	}
 
-	fmt.Print(user)
-	fmt.Print(user.IsVerified)
 	err := as.userRepo.GetUserByStruct(&user)
 	if err != nil {
 		return "", err
@@ -96,7 +97,9 @@ func (as *AuthService) VerifyPassword(
 	return utils.VerifyPassword(password, passwordHash)
 }
 
-func (as *AuthService) VerifyOTP(verifyOtpBody *validators.VerifyOTP) (string, bool, error) {
+func (as *AuthService) VerifyOTP(
+	verifyOtpBody *validators.VerifyOTP,
+) (string, bool, error) {
 	encodedOtpData, err := as.redisRepo.Get(verifyOtpBody.Id)
 	if err != nil {
 		if err == redis.Nil {

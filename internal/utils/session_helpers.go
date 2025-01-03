@@ -1,7 +1,8 @@
 package utils
 
 import (
-	"fmt"
+	"keizer-auth/internal/constants"
+	"keizer-auth/internal/models"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -10,16 +11,8 @@ import (
 
 const SessionExpiresIn = 30 * 24 * time.Hour
 
-func GenerateSessionID() (string, error) {
-	generate, err := cuid2.Init(
-		cuid2.WithLength(15),
-	)
-	if err != nil {
-		fmt.Println(err.Error())
-		return "", err
-	}
-
-	return generate(), nil
+func GenerateSessionID() string {
+	return cuid2.Generate()
 }
 
 func SetSessionCookie(c *fiber.Ctx, sessionID string) {
@@ -28,14 +21,19 @@ func SetSessionCookie(c *fiber.Ctx, sessionID string) {
 		Value:    sessionID,
 		Expires:  time.Now().Add(SessionExpiresIn),
 		HTTPOnly: true,
-		Secure:   true,
+		Secure:   false,
 		SameSite: fiber.CookieSameSiteNoneMode,
-		// TODO: handle domain
-		Domain: "localhost",
-		Path:   "/",
 	})
 }
 
 func GetSessionCookie(c *fiber.Ctx) string {
 	return c.Cookies("session_id", "")
+}
+
+func GetCurrentUser(c *fiber.Ctx) *models.User {
+	user, ok := c.Locals(constants.UserContextKey).(*models.User)
+	if !ok {
+		return nil
+	}
+	return user
 }

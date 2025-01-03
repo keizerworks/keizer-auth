@@ -105,6 +105,10 @@
     @apply scroll-m-20 text-xl font-semibold font-serif tracking-tight;
   }
 
+  h5 {
+    @apply scroll-m-20 text-lg font-semibold font-serif tracking-tight;
+  }
+
   p {
     @apply leading-7 font-sans;
   }
@@ -119,5 +123,14 @@
 
   blockquote {
     @apply mt-6 border-l-2 pl-6 font-serif italic;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }

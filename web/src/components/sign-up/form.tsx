@@ -1,9 +1,7 @@
-"use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GitHubLogoIcon } from "@radix-ui/react-icons";
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import { AxiosError } from "axios";
 import * as React from "react";
 import { useForm } from "react-hook-form";
@@ -128,6 +126,16 @@ export function SignUpForm({ className, ...props }: UserAuthFormProps) {
       <Button disabled variant="outline" type="button">
         <GitHubLogoIcon className="size-4" /> GitHub
       </Button>
+
+      <small className="text-muted-foreground text-center">
+        Already have an account?{" "}
+        <Link
+          className="text-primary underline-offset-4 hover:underline"
+          to="/sign-in"
+        >
+          Sign in
+        </Link>
+      </small>
     </div>
   );
 }

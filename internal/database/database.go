@@ -3,12 +3,11 @@ package database
 import (
 	"context"
 	"fmt"
+	"keizer-auth/internal/models"
 	"log"
 	"os"
 	"strconv"
 	"time"
-
-	"keizer-auth/internal/models"
 
 	_ "github.com/joho/godotenv/autoload"
 	"gorm.io/driver/postgres"
@@ -42,7 +41,6 @@ var (
 )
 
 func New() Service {
-	// Reuse Connection
 	if dbInstance != nil {
 		return dbInstance
 	}
@@ -83,10 +81,39 @@ func GetDB() *gorm.DB {
 }
 
 func autoMigrate(db *gorm.DB) error {
-	return db.AutoMigrate(
-		&models.User{},
+	user := &models.User{}
+	if err := user.BeforeMigrate(db); err != nil {
+		return err
+	}
+
+	if err := db.AutoMigrate(
+		user,
 		&models.Domain{},
-	)
+		&models.Account{},
+		&models.UserAccount{},
+	); err != nil {
+		return err
+	}
+
+	if err := db.Exec(`
+    DO $$
+    BEGIN
+        IF NOT EXISTS (
+            SELECT 1 
+            FROM information_schema.constraint_column_usage 
+            WHERE table_name = 'user_accounts' 
+              AND constraint_name = 'check_role'
+        ) THEN
+            ALTER TABLE user_accounts 
+            ADD CONSTRAINT check_role 
+            CHECK (role IN ('admin', 'member'));
+        END IF;
+    END $$;
+  `).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Health checks the health of the database connection by pinging the database.

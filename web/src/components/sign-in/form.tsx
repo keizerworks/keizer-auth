@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GitHubLogoIcon } from "@radix-ui/react-icons";
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import { AxiosError } from "axios";
 import * as React from "react";
 import { useForm } from "react-hook-form";
@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { signInMutationFn } from "~/actions/auth/sign-in";
+import { setUser } from "~/global-state/persistant-storage/token";
 import { cn } from "~/lib/utils";
 import { emailPassSignInSchema } from "~/schema/auth";
 
@@ -18,13 +19,13 @@ import { Button } from "../ui/button";
 import { Form, FormField } from "../ui/form";
 import { Input } from "../ui/input";
 import { PasswordInput } from "../ui/password-input";
+import { Separator } from "../ui/separator";
 
 type UserAuthFormProps = React.HTMLAttributes<HTMLDivElement>;
 type EmailSignInSchema = z.infer<typeof emailPassSignInSchema>;
 
 export function SignInForm({ className, ...props }: UserAuthFormProps) {
   const router = useRouter();
-
   const form = useForm<EmailSignInSchema>({
     resolver: zodResolver(emailPassSignInSchema),
   });
@@ -32,7 +33,9 @@ export function SignInForm({ className, ...props }: UserAuthFormProps) {
   const { mutate, isPending } = useMutation({
     mutationFn: signInMutationFn,
     onSuccess: (res) => {
-      toast.success(res.message);
+      console.log(res);
+      setUser(res);
+      toast.success("Logged in successfully");
       router.navigate({ to: "/" });
     },
     onError: (err) => {
@@ -109,6 +112,17 @@ export function SignInForm({ className, ...props }: UserAuthFormProps) {
       <Button disabled variant="outline" type="button">
         <GitHubLogoIcon className="size-4" /> GitHub
       </Button>
+
+      <small className="text-muted-foreground text-center">
+        Don't have an account?{" "}
+        <Link
+          className="text-primary underline-offset-4 hover:underline"
+          to="/sign-up"
+        >
+          Sign up
+        </Link>
+      </small>
+      <Separator />
     </div>
   );
 }
